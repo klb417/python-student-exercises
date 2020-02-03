@@ -8,12 +8,11 @@ class StudentExerciseReports:
             "/Users/klb/workspace/python/student-exercises/studentexercises.db"
         )
 
-    def create_student(self, cursor, row):
-        return Student(row[1], row[2], row[3], row[4])
-
     def all_students(self):
         with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = self.create_student
+            conn.row_factory = lambda cursor, row: Student(
+                row[1], row[2], row[3], row[4]
+            )
             db_cursor = conn.cursor()
 
             db_cursor.execute(
