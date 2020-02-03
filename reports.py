@@ -31,9 +31,7 @@ class StudentExerciseReports:
             all_students = db_cursor.fetchall()
 
             for student in all_students:
-                print(
-                    f"{student.first_name} {student.last_name} is in {student.cohort}"
-                )
+                print(student)
 
 
 report = StudentExerciseReports()
