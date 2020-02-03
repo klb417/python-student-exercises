@@ -30,8 +30,7 @@ class StudentExerciseReports:
 
             all_students = db_cursor.fetchall()
 
-            for student in all_students:
-                print(student)
+            [print(student) for student in all_students]
 
 
 report = StudentExerciseReports()
