@@ -8,3 +8,6 @@ class Instructor(NSSPerson):
 
     def assign_exercise(self, exercise, student):
         student.current_exercises.append(exercise)
+
+    def __repr__(self):
+        return f"{self.first_name} {self.last_name} instructs {self.cohort} and specializes in {self.specialty}"

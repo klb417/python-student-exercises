@@ -15,3 +15,6 @@ class Cohort:
 
     def add_instructors(self, instructors):
         self.instructors.extend(instructors)
+
+    def __repr__(self):
+        return f"{self.name}"
