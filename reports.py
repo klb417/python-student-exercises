@@ -78,8 +78,48 @@ class StudentExerciseReports:
             print(f"\n{exercise_language} exercises")
             [print(f" {exercise.name}") for exercise in all_exercises_for_languages]
 
+    def list_exercises_for_students(self):
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+
+            db_cursor.execute(
+                """
+                    SELECT s.id, s.first_name, s.last_name, s.slack_handle, c.name, e.name
+                    FROM Student s
+                    JOIN AssignedExercise ae
+                    ON s.id = ae.student_id 
+                    JOIN Exercise e
+                    ON ae.exercise_id = e.id
+                    JOIN Cohort c
+                    ON s.cohort_id = c.id;
+            """
+            )
+
+            student_results = db_cursor.fetchall()
+            student_dict = dict()
+
+            for student in student_results:
+                student_id = student[0]
+                first_name = student[1]
+                last_name = student[2]
+                slack_handle = student[3]
+                cohort = student[4]
+                exercise = student[5]
+
+                if student_id not in student_dict:
+                    student_dict[student_id] = Student(
+                        first_name, last_name, slack_handle, cohort, [exercise]
+                    )
+                else:
+                    student_dict[student_id].current_exercises.append(exercise)
+
+            for student_id, student in student_dict.items():
+                print(f"{student.first_name} {student.last_name} is working on:")
+                [print(f"  * {exercise}") for exercise in student.current_exercises]
+
 
 if __name__ == "__main__":
+    # exercise 4
     report = StudentExerciseReports()
     report.all_cohorts()
     report.all_exercises_for_languages()
@@ -88,3 +128,6 @@ if __name__ == "__main__":
     report.all_exercises_for_languages("C#")
     report.all_people_with_cohort("student")
     report.all_people_with_cohort("instructor")
+
+    # exercise 5
+    report.list_exercises_for_students()
