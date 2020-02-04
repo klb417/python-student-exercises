@@ -63,7 +63,7 @@ def import_people(cohort, role):
                 )
 
 
-def import_exercises():
+def import_assigned_exercises():
     student_list = dict()
     for student_id in range(68, 128):
         student_list[student_id] = set()
@@ -79,8 +79,6 @@ def import_exercises():
             )
 
 
-# import_exercises()
-
 # import_people("36", "student")
 # import_people("37", "student")
 # import_people("38", "student")
@@ -88,3 +86,6 @@ def import_exercises():
 # import_people("36", "instructor")
 # import_people("37", "instructor")
 # import_people("38", "instructor")
+
+# import_exercises()
+# import_assigned_exercises()
