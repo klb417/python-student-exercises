@@ -117,6 +117,47 @@ class StudentExerciseReports:
                 print(f"{student.first_name} {student.last_name} is working on:")
                 [print(f"  * {exercise}") for exercise in student.current_exercises]
 
+    def list_exercises_for_instructors(self):
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+
+            db_cursor.execute(
+                """
+                    SELECT i.id, i.first_name, i.last_name, i.slack_handle, i.specialty, c.name, e.name
+                    FROM Instructor i
+                    JOIN AssignedExercise ae
+                    ON i.id = ae.instructor_id 
+                    JOIN Exercise e
+                    ON ae.exercise_id = e.id
+                    JOIN Cohort c
+                    ON i.cohort_id = c.id;
+            """
+            )
+
+            instructor_results = db_cursor.fetchall()
+            instructor_dict = dict()
+
+            for instructor in instructor_results:
+                instructor_id = instructor[0]
+                first_name = instructor[1]
+                last_name = instructor[2]
+                slack_handle = instructor[3]
+                specialty = instructor[4]
+                cohort = instructor[5]
+                exercise = instructor[6]
+
+                if instructor_id not in instructor_dict:
+                    instructor_dict[instructor_id] = Instructor(
+                        first_name, last_name, slack_handle, cohort, specialty
+                    )
+                exercise_set = set(instructor_dict[instructor_id].assigned_exercises)
+                exercise_set.add(exercise)
+                instructor_dict[instructor_id].assigned_exercises = list(exercise_set)
+
+            for instructor_id, instructor in instructor_dict.items():
+                print(f"{instructor.first_name} {instructor.last_name} has assigned:")
+                [print(f"  * {exercise}") for exercise in instructor.assigned_exercises]
+
     def list_students_for_exercises(self):
         with sqlite3.connect(self.db_path) as conn:
             db_cursor = conn.cursor()
@@ -161,14 +202,15 @@ class StudentExerciseReports:
 if __name__ == "__main__":
     # exercise 4
     report = StudentExerciseReports()
-    report.all_cohorts()
-    report.all_exercises_for_languages()
-    report.all_exercises_for_languages("Javascript")
-    report.all_exercises_for_languages("Python")
-    report.all_exercises_for_languages("C#")
-    report.all_people_with_cohort("student")
-    report.all_people_with_cohort("instructor")
+    # report.all_cohorts()
+    # report.all_exercises_for_languages()
+    # report.all_exercises_for_languages("Javascript")
+    # report.all_exercises_for_languages("Python")
+    # report.all_exercises_for_languages("C#")
+    # report.all_people_with_cohort("student")
+    # report.all_people_with_cohort("instructor")
 
     # exercise 5
     # report.list_exercises_for_students()
-    report.list_students_for_exercises()
+    # report.list_students_for_exercises()
+    report.list_exercises_for_instructors()
