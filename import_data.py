@@ -63,18 +63,26 @@ def import_people(cohort, role):
                 )
 
 
-def import_assigned_exercises():
-    student_list = dict()
-    for student_id in range(68, 128):
-        student_list[student_id] = set()
-        for assign in range(1, 7):
-            student_list[student_id].add(random.randint(7, 21))
-    for student_id, exercises_set in student_list.items():
+# arguments are starting index for instructors and students. This is a quick and ugly way to not mix up the cohort assignments
+def import_assigned_exercises(starting_instructor_id, starting_student_id):
+    student_dict = dict()
+    for instructor in range(starting_instructor_id, starting_instructor_id + 3):
+        for student_id in range(starting_student_id, starting_student_id + 20):
+            if student_id not in student_dict:
+                student_dict[student_id] = set()
+            for num in range(1, 3):
+                new_exercise = random.randint(7, 21)
+                if new_exercise not in [
+                    assigned_exercise[0]
+                    for assigned_exercise in student_dict[student_id]
+                ]:
+                    student_dict[student_id].add((new_exercise, instructor))
+    for student_id, exercises_set in student_dict.items():
         for exercise in exercises_set:
             import_data.insert_sql(
                 f"""
                 INSERT INTO AssignedExercise
-                VALUES (null, {exercise}, {student_id})
+                VALUES (null, {exercise[0]}, {student_id}, {exercise[1]})
             """
             )
 
@@ -88,4 +96,4 @@ def import_assigned_exercises():
 # import_people("38", "instructor")
 
 # import_exercises()
-# import_assigned_exercises()
+# import_assigned_exercises(1, 1)
