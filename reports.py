@@ -117,6 +117,46 @@ class StudentExerciseReports:
                 print(f"{student.first_name} {student.last_name} is working on:")
                 [print(f"  * {exercise}") for exercise in student.current_exercises]
 
+    def list_students_for_exercises(self):
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+
+            db_cursor.execute(
+                """
+                    SELECT e.id, e.name, e.programming_language, s.first_name, s.last_name
+                    FROM Student s
+                    JOIN AssignedExercise ae
+                    ON s.id = ae.student_id 
+                    JOIN Exercise e
+                    ON ae.exercise_id = e.id;
+            """
+            )
+
+            exercise_results = db_cursor.fetchall()
+            exercise_dict = dict()
+
+            for exercise in exercise_results:
+                exercise_id = exercise[0]
+                exercise_name = exercise[1]
+                programming_language = exercise[2]
+                first_name = exercise[3]
+                last_name = exercise[4]
+
+                if exercise_id not in exercise_dict:
+                    exercise_dict[exercise_id] = {
+                        "name": exercise_name,
+                        "language": programming_language,
+                        "students": [f"{first_name} {last_name}"],
+                    }
+                else:
+                    exercise_dict[exercise_id]["students"].append(
+                        f"{first_name} {last_name}"
+                    )
+
+            for exercise_id, exercise in exercise_dict.items():
+                print(f"{exercise['name']} is being worked on by:")
+                [print(f"  * {student}") for student in exercise["students"]]
+
 
 if __name__ == "__main__":
     # exercise 4
@@ -130,4 +170,5 @@ if __name__ == "__main__":
     report.all_people_with_cohort("instructor")
 
     # exercise 5
-    report.list_exercises_for_students()
+    # report.list_exercises_for_students()
+    report.list_students_for_exercises()
