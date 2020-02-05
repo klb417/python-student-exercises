@@ -198,10 +198,57 @@ class StudentExerciseReports:
                 print(f"{exercise['name']} is being worked on by:")
                 [print(f"  * {student}") for student in exercise["students"]]
 
+    def list_assigned_exercises(self):
+        with sqlite3.connect(self.db_path) as conn:
+            db_cursor = conn.cursor()
+
+            db_cursor.execute(
+                """
+                    SELECT e.id, e.name, e.programming_language, s.first_name, s.last_name, i.first_name, i.last_name
+                    FROM Student s
+                    JOIN AssignedExercise ae
+                    ON s.id = ae.student_id 
+                    JOIN Exercise e
+                    ON ae.exercise_id = e.id
+                    JOIN Instructor i
+                    ON ae.instructor_id = i.id
+                    JOIN Cohort c
+                    ON i.cohort_id = c.id;
+            """
+            )
+
+            exercise_results = db_cursor.fetchall()
+            exercise_dict = dict()
+
+            for exercise in exercise_results:
+                exercise_id = exercise[0]
+                exercise_name = exercise[1]
+                programming_language = exercise[2]
+                student_name = f"{exercise[3]} {exercise[4]}"
+                instructor_name = f"{exercise[5]} {exercise[6]}"
+
+                if exercise_id not in exercise_dict:
+                    exercise_dict[exercise_id] = {
+                        "name": exercise_name,
+                        "language": programming_language,
+                        "assigned": [(instructor_name, student_name)],
+                    }
+                else:
+                    exercise_dict[exercise_id]["assigned"].append(
+                        (instructor_name, student_name)
+                    )
+            for exercise_id, exercise_details in exercise_dict.items():
+                print(f"{exercise_details['name']}")
+                [
+                    print(f"  * {assigned[0]} assigned this to {assigned[1]}")
+                    for assigned in exercise_details["assigned"]
+                ]
+
 
 if __name__ == "__main__":
-    # exercise 4
     report = StudentExerciseReports()
+
+    # exercise 4
     # report.all_cohorts()
     # report.all_exercises_for_languages()
     # report.all_exercises_for_languages("Javascript")
@@ -213,4 +260,5 @@ if __name__ == "__main__":
     # exercise 5
     # report.list_exercises_for_students()
     # report.list_students_for_exercises()
-    report.list_exercises_for_instructors()
+    # report.list_exercises_for_instructors()
+    report.list_assigned_exercises()
